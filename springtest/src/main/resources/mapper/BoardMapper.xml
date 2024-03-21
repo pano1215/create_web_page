@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kyobo.mapper.BoardMapper">
+	<select id="boardList" resultType="com.kyobo.vo.BoardVO" > <!-- parameterType="com.kyobo.vo.PagingVO" -->
+		SELECT boardId, userNickname, postDate, postTitle, postContent, id FROM board
+		<if test='searchWord != null'>
+			WHERE ${board_search} LIKE '%${searchWord}%'
+		</if>
+		ORDER BY boardId DESC
+		LIMIT ${currentPage}, 20
+	</select> 
+	
+	<!-- 모든 글 개수 -->
+	<select id="boardCount" resultType="int">
+		SELECT count(boardId) as cnt FROM board
+		<if test='searchWord != null'>
+			WHERE ${board_search} LIKE '%${searchWord}%'
+		</if>
+	</select>
+
+	<select id="boardSearch" resultType="com.kyobo.vo.BoardVO">
+		SELECT boardId, userNickname, postDate, postTitle, postContent, currentPage, totalPage, id FROM board
+		<if test='searchWord != null'>
+			WHERE ${board_search} LIKE '%${searchWord}%' 
+		</if>
+		ORDER BY boardId DESC
+	</select> 
+	
+	<insert id="boardInsert" useGeneratedKeys="true" keyProperty="id" parameterType="BoardVO" >
+		insert into board(userNickname, postDate, postTitle, postContent, id)
+		values(#{userNickname}, #{postDate}, #{postTitle}, #{postContent}, #{id})
+	</insert>
+	
+	<select id="boardView" resultType="com.kyobo.vo.BoardVO">
+		SELECT boardId, userNickname, date_format(postDate, '%Y-%m-%d') as postDate, postTitle, postContent, id FROM board
+		where boardId = #{boardId}
+	</select>
+	
+	<update id="boardEdit">
+		UPDATE board SET postDate = #{postDate}, postTitle = #{postTitle}, postContent = #{postContent}
+		WHERE boardId = #{boardId} AND id = #{id}
+	</update>
+</mapper>
